@@ -9,6 +9,7 @@ public:
 	Vec2 position;
 	Vec2 velocity;
 	Vec2 acceleration;
+
 	Vec2 netForce=Vec2(0.0,0.0);
 	float mass;
 	float invMass;
