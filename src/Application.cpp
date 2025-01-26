@@ -153,8 +153,7 @@ void Application::render(){
 
 	//render springs
 	for(auto sm:springMassSystems){
-		Graphics::DrawFillCircle(sm.sp->anchor->x, sm.sp->anchor->y,2,0xff0011e3);
-		Graphics::DrawLine(sm.sp->anchor->x, sm.sp->anchor->y,sm.bob->position.x, sm.bob->position.y,0xffffffff);
+		Graphics::DrawLine(sm.end1->position.x, sm.end1->position.y,sm.end2->position.x, sm.end2->position.y,0xffffffff);
 	}	
 	//render the particcles
 	for(auto particle:particles)
@@ -165,9 +164,6 @@ void Application::render(){
 void Application::destroy(){
 	for(auto particle:particles){
 		delete particle;
-	}
-	for(auto sm:springMassSystems){
-		delete sm.sp;
 	}
 	Graphics::CloseWindow();
 }

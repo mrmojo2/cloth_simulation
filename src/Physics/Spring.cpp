@@ -1,9 +1,6 @@
 #include "Spring.h"
 
-Spring::Spring(Vec2* anchor, float eqb_length, float stiffness) : anchor(anchor), eqb_length(eqb_length), stiffness(stiffness){	
+Spring::Spring(Particle* end1, Particle* end2,float stiffness) : end1(end1),end2(end2),stiffness(stiffness){
+	eqb_length = (end1->position-end2->position).magnitude();	
 }
 
-
-
-SpringMass::SpringMass(Spring* sp, Particle* bob):sp(sp),bob(bob){
-}

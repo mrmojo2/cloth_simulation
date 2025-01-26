@@ -40,12 +40,12 @@ Vec2 Force::getGravitationalForce(const Particle& p1, const Particle& p2, float 
 	return gravitationalForce;
 }
 
-Vec2 Force::getSpringForce(const SpringMass& sm){
+Vec2 Force::getSpringForce(const Spring& s){
 	Vec2 springForce = Vec2(0,0);
-	Vec2 l = sm.bob->position - *(sm.sp->anchor);
+	Vec2 l = s.end1->position - s.end2->position;
 	
 	Vec2 direction = l.unit();
-	double magnitude = sm.sp->stiffness * (sm.sp->eqb_length-l.magnitude());
+	double magnitude = s.stiffness * (s.eqb_length-l.magnitude());
 	springForce = direction * magnitude;	
 	
 	return springForce;	

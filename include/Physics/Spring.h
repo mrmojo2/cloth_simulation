@@ -5,19 +5,12 @@
 
 class Spring{
 public:
-	Vec2 *anchor;
+	Particle* end1;
+	Particle* end2;
 	float eqb_length;
 	float stiffness;
 
-	Spring(Vec2* anchor, float eqb_length, float stiffness);
-};
-
-class SpringMass{
-public:
-	Spring* sp;
-	Particle* bob;
-
-	SpringMass(Spring* sp, Particle* bob);
+	Spring(Particle*, Particle*, float stiffness);
 };
 
 

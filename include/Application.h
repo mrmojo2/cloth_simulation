@@ -13,7 +13,7 @@ class Application{
 private:
 	bool running = false;
 	std::vector<Particle*> particles;
-	std::vector<SpringMass> springMassSystems;
+	std::vector<Spring> springMassSystems;
 	Vec2 pushForce = Vec2(0,0);		//to give a force through keyboard
 	Vec2 mousePos = Vec2(0,0);		
 	
