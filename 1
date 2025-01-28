@@ -30,7 +30,6 @@ void Application::setup(){
 		for(int j = 0; j< col; j++){
 			float mass = i == 0 ? 0.0: 2.0;
 			Particle* p = new Particle((Graphics::windowWidth/2 - 30*col/2) + j*30, 100 + i*15,mass);
-			p->radius = 2;
 			particles.push_back(p);
 		}
 	}
@@ -48,6 +47,19 @@ void Application::setup(){
 				Particle* p3 = particles[col*i + j + 1];
 				Spring s2 = Spring(p1,p3,300);	
 				springMassSystems.push_back(s2);
+			}
+
+			if((j!=col-1)&&(i!=row-1)){
+				Particle* p4 = particles[col*(i+1) + j + 1];
+				Spring s3 = Spring(p1,p4,300);	
+				springMassSystems.push_back(s3);
+			}
+
+			if((i!=0)){
+				Particle* p5 = particles[col*(i-1) + j + 1];
+				Spring s4 = Spring(p1,p5,300);	
+				springMassSystems.push_back(s4);
+			
 			}
 		}
 	}
@@ -98,8 +110,9 @@ void Application::input(){
 					for(int i=0;i<particles.size();i++){
 						if( (curMouseX > particles[i]->position.x - (particles[i]->radius+5)) && (curMouseX < particles[i]->position.x + (particles[i]->radius+5)) && 
 						    (curMouseY > particles[i]->position.y - (particles[i]->radius+5)) && (curMouseY < particles[i]->position.y + (particles[i]->radius+5)) ){
-							drawMouseImpulseLine = true;
-							mouseImpulseParticleIndex = i;
+							/*drawMouseImpulseLine = true;
+							mouseImpulseParticleIndex = i;*/
+							particles[i]->position = mousePos;
 						}
 					}
 					buttonDownTime = SDL_GetTicks();

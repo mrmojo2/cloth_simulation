@@ -6,10 +6,14 @@ Particle::Particle():radius(0),position(Vec2(0,0)),mass(0){}
 
 Particle::Particle(int x, int y, float mass):position(Vec2(x,y)),mass(mass){
 	radius = std::clamp((int)mass,5,20);
-	invMass = 1/mass;
+	if(mass)
+		invMass = 1/mass;
+	else
+		invMass = 0;
 }
 
 void Particle::integrate(float dt){
+	if(!invMass) return;
 	acceleration = netForce * invMass;
 
 	velocity += acceleration * dt;
