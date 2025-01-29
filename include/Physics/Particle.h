@@ -6,6 +6,7 @@
 class Particle{
 public:
 	int radius;
+	Vec2 prevPosition;
 	Vec2 position;
 	Vec2 velocity;
 	Vec2 acceleration;
