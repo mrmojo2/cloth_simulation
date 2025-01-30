@@ -6,13 +6,16 @@
 #include <iostream>
 #include <stdint.h>
 
+#define DRAG_RADIUS 50
+
 bool Application::isRunning(){
 	return running;
 }
 
 void Application::setup(){
 	running = Graphics::OpenWindow();
-	
+
+#if 1
 	int row = 15, col = 30;
 	for(int i = 0; i<row; i++){
 		for(int j = 0; j< col; j++){
@@ -23,7 +26,7 @@ void Application::setup(){
 		}
 	}
 
-	//connecting each column of particles with spring
+	//connecting each particles with rod
 	for(int j=0; j<col;j++){
 		for(int i=0;i<row;i++){
 			Particle* p1 = particles[col*i+j];
@@ -39,8 +42,19 @@ void Application::setup(){
 			}
 		}
 	}
-
-
+#endif
+#if 0
+	Particle* p1 = new Particle(Graphics::windowWidth/2,100,0.0);
+	Particle* p2 = new Particle(Graphics::windowWidth/2,200,5.0);
+	Particle* p3 = new Particle(Graphics::windowWidth/2,300,2.0);
+	Rod r = Rod(p1,p2);
+	Rod r2 = Rod(p2,p3);
+	particles.push_back(p1);
+	particles.push_back(p2);
+	//particles.push_back(p3);
+	rods.push_back(r);
+	//rods.push_back(r2);
+#endif
 }
 
 void Application::input(){
@@ -84,11 +98,13 @@ void Application::input(){
 				int curMouseX = event.motion.x;
 				int curMouseY = event.motion.y;		
 				if(event.button.button == SDL_BUTTON_LEFT){
+					dragParticleIndex.clear();
 					for(int i=0;i<particles.size();i++){
-						if( (curMouseX > particles[i]->position.x - (particles[i]->radius+5)) && (curMouseX < particles[i]->position.x + (particles[i]->radius+5)) && 
-						    (curMouseY > particles[i]->position.y - (particles[i]->radius+5)) && (curMouseY < particles[i]->position.y + (particles[i]->radius+5)) ){
-							drawMouseImpulseLine = true;
-							mouseImpulseParticleIndex = i;
+						if( (curMouseX > particles[i]->position.x - (particles[i]->radius+DRAG_RADIUS)) && (curMouseX < particles[i]->position.x + (particles[i]->radius+DRAG_RADIUS)) && 
+						    (curMouseY > particles[i]->position.y - (particles[i]->radius+DRAG_RADIUS)) && (curMouseY < particles[i]->position.y + (particles[i]->radius+DRAG_RADIUS)) ){
+							dragMouse = true;
+							dragStart = mousePos;
+							dragParticleIndex.push_back(i);
 						}
 					}
 					buttonDownTime = SDL_GetTicks();
@@ -99,11 +115,11 @@ void Application::input(){
 			case SDL_MOUSEBUTTONUP:
 				if(event.button.button == SDL_BUTTON_LEFT){
 					buttonUpTime = SDL_GetTicks();
-					if(drawMouseImpulseLine){
-						drawMouseImpulseLine = false;
-						Vec2 impulseDir = (particles[mouseImpulseParticleIndex]->position - mousePos).unit();
-						float impulseMag = (particles[mouseImpulseParticleIndex]->position - mousePos).magnitude();
-						particles[mouseImpulseParticleIndex]->addForce(impulseDir*impulseMag*100);
+					if(dragMouse){
+						dragMouse= false;
+						/*Vec2 impulseDir = (particles[dragParticleIndex[0]]->position - mousePos).unit();
+						float impulseMag = (particles[dragParticleIndex[0]]->position - mousePos).magnitude();
+						particles[dragParticleIndex[0]]->addForce(impulseDir*impulseMag*100);*/
 					}else{
 						//Particle* p = new Particle(event.motion.x, event.motion.y, (buttonUpTime-buttonDownTime)/50);
 						//particles.push_back(p);
@@ -135,7 +151,7 @@ void Application::update(){
 	previousFrameTime = SDL_GetTicks();
 if(isSimulationRunning){
 	//apply forces to the particles
-	for(auto particle:particles){
+	for(auto& particle:particles){
 		//weight force
 		particle->addForce(Vec2(0.0,9.8*PIXELS_PER_METER*particle->mass));
 		
@@ -149,13 +165,20 @@ if(isSimulationRunning){
 	}
 
 	//apply spring force
-	for(auto s:springMassSystems){
+	for(auto& s:springMassSystems){
 		Vec2 springForce = Force::getSpringForce(s);
 		s.end1->addForce(springForce);
 		s.end2->addForce(-springForce);
 	}
+
+
+	//perform integration
+	for(auto& particle: particles){
+		particle->integrate(deltaTime);
+	}
+	
 	//apply rod constraint
-	for(auto rod:rods){
+	for(auto& rod:rods){
 		Particle* A = rod.p1;
 		Particle* B = rod.p2;
 		if(A->invMass == 0 && B->invMass == 0) continue;
@@ -169,20 +192,14 @@ if(isSimulationRunning){
 		float da = A->invMass / (A->invMass + B->invMass);
 		float db = B->invMass / (A->invMass + B->invMass);
 
-		A->position += diff_vec*da;
-		B->position -= diff_vec*db;
-	}
-
-
-	//perform integration
-	for(auto particle: particles){
-		particle->integrate(deltaTime);
+		A->position += diff_vec*da*0.8;	//THIS DAMPING FACTOR IS VERY VERY IMPORTANT FOR STABILITY!!!!
+		B->position -= diff_vec*db*0.8;
 	}
 
 	
 }
 	//window boundary
-	for(auto particle:particles){
+	for(auto& particle:particles){
 		if((particle->position.y > (Graphics::windowHeight - particle->radius))){
 			//particle->position.y = Graphics::windowHeight - particle->radius;	//putting particle on the edges if it exceds
 			//making the collision not perfectly elastic
@@ -217,8 +234,11 @@ void Application::render(){
 	Graphics::ClearScreen(0xFF112233);
 	
 
-	if(drawMouseImpulseLine){
-		Graphics::DrawLine(particles[mouseImpulseParticleIndex]->position.x, particles[mouseImpulseParticleIndex]->position.y, mousePos.x, mousePos.y, 0xff0000ff);
+	if(dragMouse){
+		for(auto i:dragParticleIndex){
+			Vec2 displacement = mousePos - dragStart;
+			particles[i]->position += displacement*0.5;
+		}
 	}
 
 	//render springs

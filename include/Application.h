@@ -14,14 +14,17 @@ class Application{
 private:
 	bool running = false;
 	bool isSimulationRunning = false;
+	
 	std::vector<Particle*> particles;
 	std::vector<Spring> springMassSystems;
 	std::vector<Rod> rods;
-	Vec2 pushForce = Vec2(0,0);		//to give a force through keyboard
-	Vec2 mousePos = Vec2(0,0);		
 	
-	bool drawMouseImpulseLine = false;		//to give a force to a particle using mouse
-	int mouseImpulseParticleIndex;
+	Vec2 pushForce = Vec2(0,0);		//to give a force through keyboard
+	
+	Vec2 mousePos = Vec2(0,0);
+	Vec2 dragStart = Vec2(0,0);	
+	bool dragMouse = false;	
+	std::vector<int> dragParticleIndex;
 
 public:
 	Application() = default;
