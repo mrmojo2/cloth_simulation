@@ -13,11 +13,11 @@ bool Application::isRunning(){
 void Application::setup(){
 	running = Graphics::OpenWindow();
 	
-	/*int row = 15, col = 30;
+	int row = 15, col = 30;
 	for(int i = 0; i<row; i++){
 		for(int j = 0; j< col; j++){
 			float mass = i == 0 ? 0.0: 2.0;
-			Particle* p = new Particle((Graphics::windowWidth/2 - 30*col/2) + j*30, 100 + i*15,mass);
+			Particle* p = new Particle((Graphics::windowWidth/2 - 30*col/2) + j*30, 100 + i*30,mass);
 			p->radius = 2;
 			particles.push_back(p);
 		}
@@ -29,29 +29,18 @@ void Application::setup(){
 			Particle* p1 = particles[col*i+j];
 			if(i!=row-1){
 				Particle* p2 = particles[col*(i+1)+j];
-				Spring s1 = Spring(p1,p2,300);
-				springMassSystems.push_back(s1);
+				Rod r1 = Rod(p1,p2);
+				rods.push_back(r1);
 			}
 			if(j!=col-1){
 				Particle* p3 = particles[col*i + j + 1];
-				Spring s2 = Spring(p1,p3,300);	
-				springMassSystems.push_back(s2);
+				Rod r2 = Rod(p1,p3);	
+				rods.push_back(r2);
 			}
 		}
-	}*/
+	}
 
 
-	Particle* p1 = new Particle(Graphics::windowWidth/2,100,0.0);
-	Particle* p2 = new Particle(Graphics::windowWidth/2,200,2.0);
-
-	Rod r = Rod(p1,p2);
-
-	particles.push_back(p1);
-	particles.push_back(p2);
-	rods.push_back(r);
-
-	Particle* p3 = new Particle(200,300,5);
-	particles.push_back(p3);	
 }
 
 void Application::input(){
