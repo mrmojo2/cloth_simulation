@@ -199,6 +199,7 @@ if(isSimulationRunning){
 	
 }
 	//window boundary
+	//TODO: handle the case of particle exceding the boundary!
 	for(auto& particle:particles){
 		if((particle->position.y > (Graphics::windowHeight - particle->radius))){
 			//particle->position.y = Graphics::windowHeight - particle->radius;	//putting particle on the edges if it exceds
@@ -236,9 +237,9 @@ void Application::render(){
 
 	if(dragMouse){
 		for(auto i:dragParticleIndex){
-			Vec2 displacement = mousePos - dragStart;
-			particles[i]->position += displacement*0.5;
+			particles[i]->position = particles[i]->position*0.8+ mousePos*0.2; //intrapolation for smooth dragging
 		}
+
 	}
 
 	//render springs
