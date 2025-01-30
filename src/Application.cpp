@@ -12,20 +12,8 @@ bool Application::isRunning(){
 
 void Application::setup(){
 	running = Graphics::OpenWindow();
-
-	/*int n = 15;
-	Particle* anchor = new Particle(Graphics::windowWidth/2,100,0);
-	particles.push_back(anchor);
-	for(int i=1;i<=n;i++){
-		Particle* bob = new Particle(Graphics::windowWidth/2,100 + i*15,2.0);
-		Spring spring = Spring(particles[i-1],bob,300);
-
-		particles.push_back(bob);
-		springMassSystems.push_back(spring);
-	}*/
 	
-
-	int row = 15, col = 30;
+	/*int row = 15, col = 30;
 	for(int i = 0; i<row; i++){
 		for(int j = 0; j< col; j++){
 			float mass = i == 0 ? 0.0: 2.0;
@@ -50,8 +38,20 @@ void Application::setup(){
 				springMassSystems.push_back(s2);
 			}
 		}
-	}
+	}*/
 
+
+	Particle* p1 = new Particle(Graphics::windowWidth/2,100,0.0);
+	Particle* p2 = new Particle(Graphics::windowWidth/2,200,2.0);
+
+	Rod r = Rod(p1,p2);
+
+	particles.push_back(p1);
+	particles.push_back(p2);
+	rods.push_back(r);
+
+	Particle* p3 = new Particle(200,300,5);
+	particles.push_back(p3);	
 }
 
 void Application::input(){
@@ -155,7 +155,7 @@ if(isSimulationRunning){
 		
 		//drag force
 		Vec2 drag = Force::getDragForce(*particle, 0.002);
-		particle->addForce(drag);
+		//particle->addForce(drag);
 
 	}
 
@@ -165,29 +165,62 @@ if(isSimulationRunning){
 		s.end1->addForce(springForce);
 		s.end2->addForce(-springForce);
 	}
+	//apply rod constraint
+	for(auto rod:rods){
+		Particle* A = rod.p1;
+		Particle* B = rod.p2;
+		if(A->invMass == 0 && B->invMass == 0) continue;
+		Vec2 OA = A->position;
+		Vec2 OB = B->position;
+		
+		Vec2 AB = OB-OA;
+		float diff = AB.magnitude() - rod.length;
+		Vec2 diff_vec = AB.unit()*diff;	
+		
+		float da = A->invMass / (A->invMass + B->invMass);
+		float db = B->invMass / (A->invMass + B->invMass);
+
+		A->position += diff_vec*da;
+		B->position -= diff_vec*db;
+	}
 
 
 	//perform integration
 	for(auto particle: particles){
 		particle->integrate(deltaTime);
 	}
+
 	
 }
 	//window boundary
 	for(auto particle:particles){
 		if((particle->position.y > (Graphics::windowHeight - particle->radius))){
-			particle->position.y = Graphics::windowHeight - particle->radius;	//putting particle on the edges if it exceds
-			particle->velocity.y *= -0.9;						//making the collision not perfectly elastic
+			//particle->position.y = Graphics::windowHeight - particle->radius;	//putting particle on the edges if it exceds
+			//making the collision not perfectly elastic
+				//particle->velocity.y *= -0.9;					//for euler integration
+
+			Vec2 tmp = particle->prevPosition;
+			particle->prevPosition.y = particle->position.y;
+			particle->position.y = tmp.y;
 		}else if(particle->position.y < (0 + particle->radius)){
-			particle->position.y = particle->radius;
-			particle->velocity.y *= -0.9;
+			//particle->position.y = particle->radius;
+			//particle->velocity.y *= -0.9;
+			Vec2 tmp = particle->prevPosition;
+			particle->prevPosition.y = particle->position.y;
+			particle->position.y = tmp.y;
 		}
 		if(particle->position.x > (Graphics::windowWidth - particle->radius)){
-			particle->position.x = Graphics::windowWidth - particle->radius;	//putting particle on the edges if it exceds
-			particle->velocity.x *= -0.9;						//making the collision not perfectly elastic
+			//particle->position.x = Graphics::windowWidth - particle->radius;	//putting particle on the edges if it exceds
+			//particle->velocity.x *= -0.9;						//making the collision not perfectly elastic
+			Vec2 tmp = particle->prevPosition;
+			particle->prevPosition.x = particle->position.x;
+			particle->position.x = tmp.x;
 		}else if(particle->position.x < (0 + particle->radius)){
-			particle->position.x = particle->radius;
-			particle->velocity.x *= -0.9;
+			//particle->position.x = particle->radius;
+			//particle->velocity.x *= -0.9;
+			Vec2 tmp = particle->prevPosition;
+			particle->prevPosition.x = particle->position.x;
+			particle->position.x = tmp.x;
 		}	
 	}
 }
@@ -202,6 +235,10 @@ void Application::render(){
 	//render springs
 	for(auto sm:springMassSystems){
 		Graphics::DrawLine(sm.end1->position.x, sm.end1->position.y,sm.end2->position.x, sm.end2->position.y,0xffffffff);
+	}	
+	//render rods
+	for(auto rod:rods){
+		Graphics::DrawLine(rod.p1->position.x, rod.p1->position.y,rod.p2->position.x, rod.p2->position.y,0xffffffff);
 	}	
 	//render the particcles
 	for(auto particle:particles)

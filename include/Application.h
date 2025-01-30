@@ -3,6 +3,7 @@
 
 #include "Particle.h"
 #include "Spring.h"
+#include "Rod.h"
 #include "Vector.h"
 
 #include <vector>
@@ -15,6 +16,7 @@ private:
 	bool isSimulationRunning = false;
 	std::vector<Particle*> particles;
 	std::vector<Spring> springMassSystems;
+	std::vector<Rod> rods;
 	Vec2 pushForce = Vec2(0,0);		//to give a force through keyboard
 	Vec2 mousePos = Vec2(0,0);		
 	

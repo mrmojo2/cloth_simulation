@@ -4,6 +4,7 @@
 #include "Particle.h"
 
 class Rod{
+public:
 	Particle* p1;
 	Particle* p2;
 	float length;
