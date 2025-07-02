@@ -18,8 +18,8 @@
 
 2. Clone the repository:
    ```bash
-   git clone https://github.com/mrmojo2/springmass_softbody_simulation.git
-   cd springmass_softbody_simulation
+   git clone https://github.com/mrmojo2/cloth_simulation.git
+   cd cloth_simulation
    ```
 
 3. Build the project:
